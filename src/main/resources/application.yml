@@ -1,0 +1,23 @@
+#This file is automatically loaded by Spring boot, because files in src/main/resources will be copied to the root dir of the classpath
+#On runtime, Spring application will load properties from application.yml/.properties from either classpath root or current directory or /config subpackage/subdir
+#Read more at https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html
+
+#application.yml contains all the default values
+
+hello.world:
+    env.notification: default environment
+
+payment:
+  method: cash
+
+database:
+  url: jdbc:mysql://localhost:5432/dbinstance
+  username: foo
+  password: bar
+
+logging:
+  pattern:
+    #console: '%date{HH:mm:ss.SSS} %green(%-5level) %blue(%-25.25class{0} [%3L]) - %msg%n'
+  level:
+    com.ycm: DEBUG
+    com.ycm.model: DEBUG

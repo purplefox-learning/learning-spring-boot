@@ -1,0 +1,143 @@
+//buildscript{} block is used to support the execution of gradle build script itself
+buildscript {
+    ext { springBootVersion = '1.5.7.RELEASE' }
+
+    repositories {
+        maven { url "https://artifactory.global.standardchartered.com/artifactory/maven-release" }  //needed inside the organization
+        jcenter()   //needed when building outside the organization
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" //needed for apply plugin: 'org.springframework.boot'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"  //needed for apply plugin: 'com.jfrog.artifactory'
+    }
+}
+
+repositories {
+    maven { url "https://artifactory.global.standardchartered.com/artifactory/maven-release" }
+    jcenter()
+}
+
+//Language section
+apply plugin: 'groovy'
+
+//IDE section
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+//Core library section
+apply plugin: 'org.springframework.boot'
+
+//packaging and distribution section
+apply plugin: 'maven-publish'
+apply plugin: 'distribution'
+apply plugin: 'com.jfrog.artifactory'
+
+//Setting standard "Project" properties
+//name is set in settings.gradle
+group = artifactGroup
+version = artifactVersion
+
+//IntelliJ use this sourceSets definition to understand the project structure
+//Although the following definition is the default setting, it is still good to explicitly declare it
+sourceSets {
+    main {
+        groovy { srcDir 'src/main/groovy' }
+        resources.srcDir 'src/main/resources'
+    }
+    test {
+        groovy { srcDir 'src/test/groovy' }
+        resources.srcDir 'src/test/resources'
+    }
+}
+
+//We need this bootRun{} because we want to address a specific gradle+springboot problem
+//Problem: this command does not work --> gradelw clean build bootRun -Dycm.command=say_hello
+//Because Gradle passes along environment variables, but not system properties to Spring Boot Application
+//so the system property 'ycm.command' is not passed from gradle to the application itself.
+//To make it work, we need to configure bootRun { systemProperties = System.properties }
+bootRun {
+    systemProperties = System.properties
+}
+
+springBoot {
+    executable = true
+    buildInfo()
+}
+
+bootRepackage {
+    classifier = 'exec'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+//spring helps manage the library dependency and their versions
+dependencyManagement { imports { mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.SR4" } }
+
+ext {
+    //extra properties here e.g. specify a version for a libarary
+}
+
+dependencies {
+
+    //project related core dependencies
+    //your lib here
+
+    //groovy core
+    compile("org.codehaus.groovy:groovy-all")
+
+    //libraries that support spring boot
+    compile("javax.inject:javax.inject")
+    compile("org.yaml:snakeyaml")
+
+    //spring boot related dependencies
+    compile('org.springframework.boot:spring-boot-starter')
+
+    //spring config related dependencies (which is not applicable in this project)
+    //compile('org.springframework.cloud:spring-cloud-starter-config')
+
+    //for testing only
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+distTar {
+    compression Compression.GZIP
+    extension "tar.gz"
+}
+
+artifactory {
+    publish {
+        defaults {
+            publications('mavenJava')
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            //artifact distTar
+            artifact(file("$buildDir/libs/$project.name-$project.version-${bootRepackage.classifier}.jar")) { classifier 'exec' }
+        }
+    }
+}
+
+//
+//distributions {
+//    main {
+//        baseName = artifactName
+//        contents {
+//            into('/') {
+//                from("$projectDir")
+//                include('*.yml')
+//                include('global_vars/**')
+//                include('wm/**')
+//                include('msg/**')
+//                include('gradle/**')
+//                include('gradlew')
+//            }
+//        }
+//    }
+//}

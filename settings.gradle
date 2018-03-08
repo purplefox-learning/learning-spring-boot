@@ -1,0 +1,4 @@
+//By default, Gradle uses the directory name as project name which is not ideal.
+//In a CICD environment, the directory name may be different leading to unexpected issues.
+//This gradle behavior can be changed by declaring rootProject.name in settings.gradle
+rootProject.name = artifactName

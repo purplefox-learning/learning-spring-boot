@@ -1,0 +1,9 @@
+
+hello.world:
+    env.notification: SIT environment
+
+database:
+  url: jdbc:postgresql:/sithost:5432/dbinstance
+  username: situser
+  password: sitpassword
+
