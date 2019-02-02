@@ -1,5 +1,10 @@
 # Get Started
 
+#### READ ME FIRST
+* This is created earlier on. To merge this project with other spring related projects. 
+* or to refactor this project so that it illustrates some unique features of spring
+* so that we either delete the project or rename it after refactoring
+
 #### TODO
 * Continue to simplify and comment on build.gradle
 
